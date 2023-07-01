@@ -13,7 +13,7 @@ android {
         versionCode 1
         versionName "1.0"
         ndk {
-            abiFilters rootProject.ext.abiFilters.split(",")
+            abiFilters 'arm64-v8a','armeabi-v7a'
         }
         externalNativeBuild {
             cmake {

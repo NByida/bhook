@@ -130,13 +130,20 @@ static void hook_create(JNIEnv *env, jobject thiz){
             , pthread_creat_hooked_callback, NULL);
 }
 
-static void* pthread_proxy_auto( pthread_attr_t* addr,  size_t size){
-    ALOG(" memeHook hook threadSize success :%ld change to ：%ld", size/1024,size/1024/4);
-    void* fd = BYTEHOOK_CALL_PREV(pthread_proxy_auto
-            , pthread_attr_setstacksize_t
-            , addr, size/4);
-    BYTEHOOK_POP_STACK();
-    return fd;
+static void *pthread_proxy_auto(pthread_attr_t *addr, size_t size) {
+    if (1040 - size/ 1024 == 0) {
+        ALOG(" memeHook hook threadSize success :%lu change to ：%lu", size / 1024, size / 1024 / 4);
+        void *fd = BYTEHOOK_CALL_PREV(pthread_proxy_auto, pthread_attr_setstacksize_t, addr,
+                                      size / 4);
+        BYTEHOOK_POP_STACK();
+        return fd;
+    } else {
+        ALOG(" memeHook hook threadSize not changed :%lu ,because stacksize!=1024 ", size / 1024);
+        void *fd = BYTEHOOK_CALL_PREV(pthread_proxy_auto, pthread_attr_setstacksize_t, addr,
+                                      size);
+        BYTEHOOK_POP_STACK();
+        return fd;
+    }
 }
 
 
