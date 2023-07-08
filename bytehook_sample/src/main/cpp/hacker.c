@@ -73,9 +73,13 @@ static int pthread_creat_auto(pthread_t* thread,  pthread_attr_t* attr,
     ALOG("memeHook   pthread_create hook success ", NULL);
     int fd = BYTEHOOK_CALL_PREV(pthread_creat_auto, pthread_creat_t, thread
             ,attr,*start_routine,arg);
+
+
     BYTEHOOK_POP_STACK();
     return fd;
 }
+
+ static int stackSize=0;
 
 typedef void* (*LogMessage_t)(void*, char const*, void*,int,char const*, void* );
 
@@ -132,13 +136,14 @@ static void hook_create(JNIEnv *env, jobject thiz){
 
 static void *pthread_proxy_auto(pthread_attr_t *addr, size_t size) {
     if (1040 - size/ 1024 == 0) {
-        ALOG(" memeHook hook threadSize success :%lu change to ：%lu", size / 1024, size / 1024 / 4);
+        ALOG(" memeHook hook threadSize success :%d  stackSize: %d",stackSize,
+          stackSize);
         void *fd = BYTEHOOK_CALL_PREV(pthread_proxy_auto, pthread_attr_setstacksize_t, addr,
-                                      size / 4);
+                                      stackSize * 1024);
         BYTEHOOK_POP_STACK();
         return fd;
     } else {
-        ALOG(" memeHook hook threadSize not changed :%lu ,because stacksize!=1024 ", size / 1024);
+        ALOG(" memeHook hook threadSize not changed :%u ,because stacksize!=1024 ", size / 1024);
         void *fd = BYTEHOOK_CALL_PREV(pthread_proxy_auto, pthread_attr_setstacksize_t, addr,
                                       size);
         BYTEHOOK_POP_STACK();
@@ -147,8 +152,10 @@ static void *pthread_proxy_auto(pthread_attr_t *addr, size_t size) {
 }
 
 
-static void hook_thread(JNIEnv *env, jobject thiz){
-    (void)env, (void)thiz;
+
+static void hook_thread(JNIEnv *env, jobject thiz, jint size){
+    (void) env, (void) thiz, (void) size;
+    stackSize = size;
     void *pthread_attr_setstacksize_proxy;
     pthread_attr_setstacksize_proxy = (void *) pthread_proxy_auto;
     ALOG(" memeHook start  hook thread size",NULL);
@@ -175,7 +182,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved){
     jclass cls;
     if(NULL == (cls = (*env)->FindClass(env, HACKER_JNI_CLASS_NAME))) return JNI_ERR;
     JNINativeMethod m[] = {
-        {"hookThread", "()V", (void *)hook_thread},
+        {"hookThread", "(I)V", (int *)hook_thread},
         {"hookCreate", "()V", (void *)hook_create},
         {"hookLog", "()V", (void *)hook_log},
     };

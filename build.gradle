@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.3'
+        classpath 'com.android.tools.build:gradle:7.2.0'
     }
 }
 
@@ -28,6 +28,7 @@ ext {
     ndkVersion = "23.1.7779620"
     cmakeVersion = "3.18.1"
     abiFilters = "armeabi-v7a,arm64-v8a,x86,x86_64"
+//    abiFilters = "armeabi-v7a"
     useASAN = false
     dependencyOnLocalLibrary = true
 

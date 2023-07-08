@@ -19,12 +19,12 @@ public class MyCustomApplication extends Application {
         System.loadLibrary("hookee"); // test for load-before-init
 
         // init bytehook
+
         int r = ByteHook.init(new ByteHook.ConfigBuilder()
                 .setMode(ByteHook.Mode.AUTOMATIC)
 //                .setMode(ByteHook.Mode.MANUAL)
                 .setDebug(true)
                 .build());
-        Log.i(TAG, "bytehook init, return: " + r);
 
         // load hacker
 
